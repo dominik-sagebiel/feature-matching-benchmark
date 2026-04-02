@@ -6,21 +6,21 @@ This project compares SIFT and SuperPoint (with SuperGlue) for image registratio
 Project Structure
 -----------------
 
-myproject/
-├── Images/                 # Put your input images here (.png, .jpg, .tif)
-├── Python/                 # Python scripts
-│   ├── 20points_onlyFLANNransac.py    # SIFT vs SuperPoint (FLANN+RANSAC)
-│   └── 20points_all_PC.py             # SuperPoint + SuperGlue comparison
-├── R/                      # R scripts
-│   └── rpautratSuperpoint_FLANNransac.R
-├── Repos/                  # External repositories (clone here)
-│   ├── SuperPoint/                     # rpautrat/SuperPoint
-│   └── SuperGluePretrainedNetwork/     # MagicLeap/SuperGlue
-├── Results/                # All outputs (auto-created)
-│   ├── Python/             # Python script results
-│   └── R/                  # R script results
-├── requirements.txt        # Python dependencies
-└── README.md              # This file
+myproject/    
+├── Images/                 # Put your input images here (.png, .jpg, .tif)   
+├── Python/                 # Python scripts   
+│   ├── 20points_onlyFLANNransac.py    # SIFT vs SuperPoint (FLANN+RANSAC)   
+│   └── 20points_all_PC.py             # SuperPoint + SuperGlue comparison   
+├── R/                      # R scripts   
+│   └── rpautratSuperpoint_FLANNransac.R   
+├── Repos/                  # External repositories (clone here)   
+│   ├── SuperPoint/                     # rpautrat/SuperPoint   
+│   └── SuperGluePretrainedNetwork/     # MagicLeap/SuperGlue   
+├── Results/                # All outputs (auto-created)   
+│   ├── Python/             # Python script results   
+│   └── R/                  # R script results   
+├── requirements.txt        # Python dependencies   
+└── README.md              # This file   
 
 Quick Start
 -----------
