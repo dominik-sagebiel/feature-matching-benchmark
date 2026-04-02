@@ -18,8 +18,7 @@ myproject/
 │   └── SuperGluePretrainedNetwork/     # MagicLeap/SuperGlue   
 ├── Results/                # All outputs (auto-created)   
 │   ├── Python/             # Python script results   
-│   └── R/                  # R script results   
-├── requirements.txt        # Python dependencies   
+│   └── R/                  # R script results    
 └── README.md              # This file   
 
 Quick Start
