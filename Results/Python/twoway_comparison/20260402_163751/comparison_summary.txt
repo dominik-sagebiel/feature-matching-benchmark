@@ -1,0 +1,25 @@
+======================================================================
+SIFT vs SuperPoint Registration Comparison
+======================================================================
+
+Input image: HEstain.png
+Rotation angle: 45°
+Grid points: 20 (4x5)
+
+SIFT RESULTS
+----------------------------------------
+Keypoints (original): 5000
+Keypoints (rotated): 5000
+FLANN matches: 3362
+RANSAC inliers: 3325 (98.9%)
+Grid point mean error: 0.27 px
+Grid points within 10px: 20/20
+
+SUPERPOINT RESULTS
+----------------------------------------
+Keypoints (original): 5000
+Keypoints (rotated): 5000
+FLANN matches: 143
+RANSAC inliers: 77 (53.8%)
+Grid point mean error: 2.61 px
+Grid points within 10px: 20/20

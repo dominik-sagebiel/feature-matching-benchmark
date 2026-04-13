@@ -13,7 +13,7 @@ import time
 from datetime import datetime
 
 # ============================================================================
-# AUTO PATH CONFIGURATION - No user editing needed!
+# AUTO PATH CONFIGURATION 
 # ============================================================================
 def setup_paths():
     """Automatically detect all paths based on script location"""
@@ -25,7 +25,7 @@ def setup_paths():
     # Define all paths relative to project root
     images_dir = project_root / 'Images'
     repos_dir = project_root / 'Repos'
-    results_dir = project_root / 'Results' / 'Python'
+    results_dir = project_root / 'Results' / 'Python' / 'twoway_comparison'
     
     # Create results directory if it doesn't exist
     results_dir.mkdir(parents=True, exist_ok=True)
