@@ -12,7 +12,7 @@ myproject/
 │   ├───20points_onlyFLANNransac.py    # SIFT vs SuperPoint (FLANN+RANSAC)  
 │   └───20points_all_PC.py             # SuperPoint + SuperGlue, SIFT + FLANN, SP + FLANN, SIFT + SG comparison  
 ├───R/                      # R scripts  
-│   └───rpautratSuperpoint_FLANNransac.R  
+│   └───rpautratSuperPoint_IMGwithSizeLimit.R  
 ├───Repos/                  # External repositories (clone here)  
 │   ├───SuperPoint/                     # rpautrat/SuperPoint  
 │   └───SuperGluePretrainedNetwork/     # MagicLeap/SuperGlue  
