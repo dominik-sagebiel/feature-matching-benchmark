@@ -27,7 +27,7 @@ Quick Start
 
 1. Clone this repository
 
-git clone [https://github.com/yourusername/myproject.git](https://github.com/dominik-sagebiel/feature-matching-benchmark.git)    
+git clone https://github.com/dominik-sagebiel/feature-matching-benchmark.git       
 cd myproject
 
 2. Clone external repositories into Repos/
