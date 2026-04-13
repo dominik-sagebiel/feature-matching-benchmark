@@ -6,7 +6,7 @@ This project compares SIFT and SuperPoint (with SuperGlue) for image registratio
 Project Structure
 -----------------
 
-myproject/  
+feature-matching-benchmark/     
 ├───Images/                # Put your input images here (.png, .jpg, .tif)  
 ├───Python/                 # Python scripts  
 │   ├───20points_onlyFLANNransac.py    # SIFT vs SuperPoint (FLANN+RANSAC)  
@@ -28,7 +28,7 @@ Quick Start
 1. Clone this repository
 
 git clone https://github.com/dominik-sagebiel/feature-matching-benchmark.git       
-cd myproject
+cd feature-matching-benchmark  
 
 2. Clone external repositories into Repos/
 
