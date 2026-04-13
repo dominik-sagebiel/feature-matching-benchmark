@@ -27,15 +27,15 @@ Quick Start
 
 1. Clone this repository
 
-git clone https://github.com/yourusername/myproject.git
+git clone https://github.com/yourusername/myproject.git  
 cd myproject
 
 2. Clone external repositories into Repos/
 
-cd Repos
-git clone https://github.com/rpautrat/SuperPoint.git
-git clone https://github.com/magicleap/SuperGluePretrainedNetwork.git
-cd ..
+cd Repos  
+git clone https://github.com/rpautrat/SuperPoint.git  
+git clone https://github.com/magicleap/SuperGluePretrainedNetwork.git  
+cd ..  
 
 3. Add your images
 
@@ -43,6 +43,6 @@ Place your test images (.png, .jpg, or .tif) in the Images/ folder.
 
 4. Run the scripts
 
-cd Python
-python 20points_onlyFLANNransac.py
-python 20points_all_PC.py
+cd Python  
+python 20points_onlyFLANNransac.py  
+python 20points_all_PC.py  
