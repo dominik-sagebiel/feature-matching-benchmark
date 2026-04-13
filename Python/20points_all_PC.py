@@ -484,7 +484,7 @@ def pipeline_sift_superglue(sg_model, image_orig, image_rot):
 # Main
 # ============================================================================
 def main():
-    image_path = project_root / 'images' / 'HEstain.png'
+    image_path = project_root / 'Images' / 'HEstain.png'
 
 
     print("=" * 80)
