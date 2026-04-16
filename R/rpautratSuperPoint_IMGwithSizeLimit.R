@@ -30,7 +30,23 @@ for (pkg in required_pkgs) {
 
 # ---- Set up relative paths using 'here' ----
 
-root_dir <- here::here()
+# ---- Get script directory robustly ----
+get_script_dir <- function() {
+  if (interactive()) {
+    if (requireNamespace("rstudioapi", quietly = TRUE) && rstudioapi::isAvailable()) {
+      return(dirname(rstudioapi::getActiveDocumentContext()$path))
+    }
+    return(getwd())
+  }
+  if (!is.null(sys.frame(1)$ofile)) {
+    return(dirname(sys.frame(1)$ofile))
+  }
+  return(getwd())
+}
+
+script_dir <- get_script_dir()
+# Since script is in myproject/R/, go one level up
+root_dir <- dirname(script_dir)   # = feature-matching-benchmark
 repos_dir   <- file.path(root_dir, "Repos")
 superpoint_dir <- file.path(repos_dir, "SuperPoint")
 weights_file <- file.path(superpoint_dir, "weights", "superpoint_v6_from_tf.pth")
