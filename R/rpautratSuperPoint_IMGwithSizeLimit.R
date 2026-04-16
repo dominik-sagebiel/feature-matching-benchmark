@@ -1,5 +1,5 @@
 # ============================================
-# SuperPoint in R (Torch) 
+# SuperPoint(rpautrat) in R (Torch) 
 # ============================================
 # Expected folder layout:
 # myproject/
@@ -30,7 +30,7 @@ for (pkg in required_pkgs) {
 
 # ---- Set up relative paths using 'here' ----
 
-root_dir <- dirname(here::here())
+root_dir <- here::here()
 repos_dir   <- file.path(root_dir, "Repos")
 superpoint_dir <- file.path(repos_dir, "SuperPoint")
 weights_file <- file.path(superpoint_dir, "weights", "superpoint_v6_from_tf.pth")
