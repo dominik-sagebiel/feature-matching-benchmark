@@ -1,0 +1,16 @@
+SuperPoint Performance Timings (R)
+========================================
+
+Image: C:/Users/domin/Nextcloud/Uni/FU Ba. BioInf/10. Sem/Praktikum MDC/feature-matching-benchmark-localCOPY/Images/HEstain.png
+Image original shape: 5473 , 7519
+
+Image shape (resized): 1704 , 2344
+
+Keypoints detected: 5000
+
+Timings:
+  Preprocessing time: 3.3855 seconds
+  Image to array time: 0.1878 seconds
+  Array to torch tensor time: 0.02 seconds
+  Inference time: 10.0696 seconds
+  Total time: 13.6629 seconds

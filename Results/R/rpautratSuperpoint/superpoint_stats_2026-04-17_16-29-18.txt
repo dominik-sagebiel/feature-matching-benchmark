@@ -1,0 +1,9 @@
+SuperPoint Results - 2026-04-17 16:29:21.64586
+Image: C:/Users/domin/Nextcloud/Uni/FU Ba. BioInf/10. Sem/Praktikum MDC/feature-matching-benchmark-localCOPY/Images/HEstain.png
+Original processed size: 3312 x 2408
+Keypoints detected: 5000
+Score range: 0.00028 to 0.01204
+Mean score: 0.00032
+Detection threshold: 1e-04
+NMS radius: 3
+Max pixels limit: 8e+06

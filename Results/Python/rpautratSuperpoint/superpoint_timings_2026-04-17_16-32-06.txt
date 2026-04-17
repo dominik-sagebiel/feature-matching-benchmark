@@ -1,0 +1,15 @@
+SuperPoint Performance Timings (Python)
+========================================
+
+Image: C:\Users\domin\Nextcloud\Uni\FU Ba. BioInf\10. Sem\Praktikum MDC\feature-matching-benchmark-localCOPY\Images\HEstain.png
+Image original shape: (5473, 7519)
+
+Image shape (resized): (1704, 2344)
+
+Keypoints detected: 10179
+
+Timings:
+  Preprocessing time: 1.2321 seconds
+  Image to tensor time: 0.0085 seconds
+  Inference time: 16.9562 seconds
+  Total time: 18.1969 seconds
