@@ -50,7 +50,7 @@ superpoint_dir <- file.path(repos_dir, "SuperPoint")
 weights_file <- file.path(superpoint_dir, "weights", "superpoint_v6_from_tf.pth")
 
 images_dir <- file.path(root_dir, "Images")
-results_dir <- file.path(root_dir, "Results", "R")
+results_dir <- file.path(root_dir, "Results", "R", "rpautratSuperpoint")
 
 # Create Results/R if it doesn't exist
 if (!dir.exists(results_dir)) {
