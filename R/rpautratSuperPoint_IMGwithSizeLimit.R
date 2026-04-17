@@ -28,8 +28,6 @@ for (pkg in required_pkgs) {
   }
 }
 
-# ---- Set up relative paths using 'here' ----
-
 # ---- Get script directory robustly ----
 get_script_dir <- function() {
   if (interactive()) {
@@ -290,7 +288,8 @@ model$eval()
 # ============================================
 # Process image with memory safety
 # ============================================
-process_image_safe <- function(image_path, model, max_pixels = 4000000) {
+process_image_safe <- function(image_path, model, max_pixels = 8000000) {
+  start_time <- Sys.time()
   img <- image_read(image_path)
   img_gray <- image_convert(img, colorspace = "gray")
   img_info <- image_info(img_gray)
@@ -323,16 +322,37 @@ process_image_safe <- function(image_path, model, max_pixels = 4000000) {
   } else {
     img_processed <- img_resized
   }
+  preprocess_time <- Sys.time() - start_time
   
+  start_time <- Sys.time()
   img_array <- as.numeric(img_processed[[1]]) / 255
+  img_to_array_time <- Sys.time() - start_time
+  start_time <- Sys.time()
   img_tensor <- torch_tensor(img_array)$view(c(1, 1, nrow(img_array), ncol(img_array)))
+  array_to_torchtensor_time <- Sys.time() - start_time
   
   rm(img, img_gray, img_resized, img_array)
   gc()
   
   cat("Running inference...\n")
+  start_time <- Sys.time()
   result <- model(img_tensor)
+  inference_time <- Sys.time() - start_time
   cat("\n✅ Detected", nrow(result$keypoints[[1]]), "keypoints\n")
+  
+  total_time <- preprocess_time + img_to_array_time + array_to_torchtensor_time + inference_time
+  
+  timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M")
+  stats_filename <- file.path(results_dir, paste0("R_timings_", max_pixels/1000000, "MP__", timestamp, ".csv"))
+  timings_df <- data.frame(
+    step = c("preprocess", "img_to_array", "array_to_tensor", "inference", "total"),
+    time_seconds = c(as.numeric(preprocess_time), 
+                     as.numeric(img_to_array_time),
+                     as.numeric(array_to_torchtensor_time),
+                     as.numeric(inference_time),
+                     as.numeric(total_time))
+  )
+  write.csv(timings_df, stats_filename, row.names = FALSE)
   
   return(list(
     keypoints = result$keypoints[[1]],
@@ -347,7 +367,7 @@ process_image_safe <- function(image_path, model, max_pixels = 4000000) {
 # ============================================
 # Run processing
 # ============================================
-max_pixels <- 8000000  # adjust if needed (8 megapixels)
+max_pixels <- 4000000  # adjust if needed (8 megapixels)
 result <- process_image_safe(image_path, model, max_pixels)
 
 keypoints <- result$keypoints
