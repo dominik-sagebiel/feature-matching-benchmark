@@ -51,27 +51,15 @@ def setup_paths():
     # Add SuperPoint to Python path
     sys.path.insert(0, str(superpoint_path))
     
-    # Find the weights file (try common locations)
-    weights_path = None
-    weight_candidates = [
-        superpoint_path / 'weights' / 'superpoint_v6_from_tf.pth',
-        superpoint_path / 'weights' / 'superpoint_v1.pth',
-        superpoint_path / 'superpoint_v6_from_tf.pth',
-        superpoint_path / 'superpoint_v1.pth',
-        project_root / 'Models' / 'superpoint_v6_from_tf.pth',  # Alternative location
-    ]
+    # Find the weights file 
+    weights_path = superpoint_path / 'weights' / 'superpoint_v6_from_tf.pth'
+   
+    print(f"✓ Found weights at: {weights_path}")
     
-    for candidate in weight_candidates:
-        if candidate.exists():
-            weights_path = candidate
-            print(f"✓ Found weights at: {weights_path}")
-            break
     
     if weights_path is None:
         raise FileNotFoundError(
             f"\n❌ SuperPoint weights not found!\n"
-            f"Searched in:\n" + 
-            "\n".join(f"  - {p}" for p in weight_candidates) +
             f"\n\nPlease ensure weights file is in the SuperPoint/weights/ directory"
         )
     
@@ -154,7 +142,7 @@ model = SuperPoint(
 )
 
 # Load weights
-weights_path = r'c:\Users\domin\Nextcloud\Uni\FU Ba. BioInf\10. Sem\Praktikum MDC\git\SuperPoint\weights\superpoint_v6_from_tf.pth'
+weights_path = Path(paths["weights_path"]) 
 state_dict = torch.load(weights_path, map_location='cpu')
 model.load_state_dict(state_dict)
 model.eval()
