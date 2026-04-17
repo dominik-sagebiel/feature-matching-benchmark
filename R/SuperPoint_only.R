@@ -342,17 +342,41 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
   
   total_time <- preprocess_time + img_to_array_time + array_to_torchtensor_time + inference_time
   
-  timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M")
-  stats_filename <- file.path(results_dir, paste0("R_timings_", max_pixels/1000000, "MP__", timestamp, ".csv"))
-  timings_df <- data.frame(
-    step = c("preprocess", "img_to_array", "array_to_tensor", "inference", "total"),
-    time_seconds = c(as.numeric(preprocess_time), 
-                     as.numeric(img_to_array_time),
-                     as.numeric(array_to_torchtensor_time),
-                     as.numeric(inference_time),
-                     as.numeric(total_time))
-  )
-  write.csv(timings_df, stats_filename, row.names = FALSE)
+  # Create timestamp
+  timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
+  
+  # Create filename with timestamp
+  txt_filename <- file.path(results_dir, paste0("superpoint_timings_", timestamp, ".txt"))
+  
+  # Get original image size (before resizing)
+  original_h <- orig_h
+  original_w <- orig_w
+  
+  # Get resized image size (after processing)
+  resized_h <- new_h
+  resized_w <- new_w
+  
+  # Save timings in same format as Python
+  writeLines(c(
+    "SuperPoint Performance Timings (R)",
+    "========================================",
+    "",
+    paste("Image:", image_path),
+    paste("Image original shape:", original_h, ",", original_w),
+    "",
+    paste("Image shape (resized):", resized_h, ",", resized_w),
+    "",
+    paste("Keypoints detected:", nrow(keypoints)),
+    "",
+    "Timings:",
+    paste("  Preprocessing time:", round(as.numeric(preprocess_time), 4), "seconds"),
+    paste("  Image to array time:", round(as.numeric(img_to_array_time), 4), "seconds"),
+    paste("  Array to torch tensor time:", round(as.numeric(array_to_torchtensor_time), 4), "seconds"),
+    paste("  Inference time:", round(as.numeric(inference_time), 4), "seconds"),
+    paste("  Total time:", round(as.numeric(total_time), 4), "seconds")
+  ), txt_filename)
+  
+  cat("✅ Timings saved to:", txt_filename, "\n")
   
   return(list(
     keypoints = result$keypoints[[1]],
@@ -377,7 +401,7 @@ img_processed <- result$image
 # ============================================
 # Save results to Results/R/ with timestamp
 # ============================================
-timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M")  
+timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")  
 
 # Visualization
 result_filename <- file.path(results_dir, paste0("superpoint_", timestamp, ".png"))
