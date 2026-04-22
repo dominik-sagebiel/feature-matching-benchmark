@@ -422,7 +422,7 @@ writeLines(
   c(
     paste("SuperPoint Results -", Sys.time()),
     paste("Image:", image_path),
-    paste("Original processed size:", result$width, "x", result$height),
+    paste("Processed size:", result$width, "x", result$height),
     paste("Keypoints detected:", nrow(keypoints)),
     paste("Score range:", round(min(scores), 5), "to", round(max(scores), 5)),
     paste("Mean score:", round(mean(scores), 5)),
