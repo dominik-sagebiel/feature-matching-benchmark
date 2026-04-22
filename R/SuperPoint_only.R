@@ -318,7 +318,8 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
   final_h <- floor(new_h / stride) * stride
   if(final_w != new_w || final_h != new_h) {
     cat("Trimming to:", final_w, "x", final_h, "\n")
-    img_processed <- image_resize(img_resized, geometry = paste0(final_w, "x", final_h))
+    # Use crop, not resize
+    img_processed <- image_crop(img_resized, geometry = paste0(final_w, "x", final_h))
   } else {
     img_processed <- img_resized
   }
@@ -337,34 +338,30 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
   cat("Running inference...\n")
   start_time <- Sys.time()
   result <- model(img_tensor)
-  inference_time <- Sys.time() - start_time
-  cat("\n✅ Detected", nrow(result$keypoints[[1]]), "keypoints\n")
+  inference_time <- as.numeric(Sys.time() - start_time)
   
-  total_time <- preprocess_time + img_to_array_time + array_to_torchtensor_time + inference_time
+  # Extract results
+  keypoints <- result$keypoints[[1]]
+  scores <- result$keypoint_scores[[1]]
+  descriptors <- result$descriptors[[1]]
   
-  # Create timestamp
+  cat("\n✅ Detected", nrow(keypoints), "keypoints\n")
+  
+  total_time <- as.numeric(preprocess_time) + as.numeric(img_to_array_time) + 
+    as.numeric(array_to_torchtensor_time) + inference_time
+  
+  # Timestamp and save
   timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
-  
-  # Create filename with timestamp
   txt_filename <- file.path(results_dir, paste0("superpoint_timings_", timestamp, ".txt"))
   
-  # Get original image size (before resizing)
-  original_h <- orig_h
-  original_w <- orig_w
-  
-  # Get resized image size (after processing)
-  resized_h <- new_h
-  resized_w <- new_w
-  
-  # Save timings in same format as Python
   writeLines(c(
     "SuperPoint Performance Timings (R)",
     "========================================",
     "",
     paste("Image:", image_path),
-    paste("Image original shape:", original_h, ",", original_w),
+    paste("Image original shape:", orig_h, ",", orig_w),
     "",
-    paste("Image shape (resized):", resized_h, ",", resized_w),
+    paste("Image shape (resized):", final_h, ",", final_w),
     "",
     paste("Keypoints detected:", nrow(keypoints)),
     "",
@@ -372,22 +369,21 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
     paste("  Preprocessing time:", round(as.numeric(preprocess_time), 4), "seconds"),
     paste("  Image to array time:", round(as.numeric(img_to_array_time), 4), "seconds"),
     paste("  Array to torch tensor time:", round(as.numeric(array_to_torchtensor_time), 4), "seconds"),
-    paste("  Inference time:", round(as.numeric(inference_time), 4), "seconds"),
-    paste("  Total time:", round(as.numeric(total_time), 4), "seconds")
+    paste("  Inference time:", round(inference_time, 4), "seconds"),
+    paste("  Total time:", round(total_time, 4), "seconds")
   ), txt_filename)
   
   cat("✅ Timings saved to:", txt_filename, "\n")
   
   return(list(
-    keypoints = result$keypoints[[1]],
-    scores = result$keypoint_scores[[1]],
-    descriptors = result$descriptors[[1]],
+    keypoints = keypoints,
+    scores = scores,
+    descriptors = descriptors,
     image = img_processed,
     width = final_w,
     height = final_h
   ))
 }
-
 # ============================================
 # Run processing
 # ============================================
