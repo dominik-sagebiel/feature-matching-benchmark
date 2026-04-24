@@ -166,7 +166,7 @@ if img is None:
 
 print(f"   Original image shape: {img.shape}")
 
-img_resized = resize_for_superpoint(img, max_pixels=4000000)
+img_resized = resize_for_superpoint(img, max_pixels=8000000)
 
 # Store resized image for visualization
 img_display = img_resized
@@ -190,9 +190,11 @@ with torch.no_grad():
 inference_time = time.time() - start_time
 
 # Extract results
+start_time = time.time()
 keypoints = output['keypoints'][0].cpu().numpy()
 descriptors = output['descriptors'][0].cpu().numpy()
 scores = output['keypoint_scores'][0].cpu().numpy()
+extraction_time = time.time() - start_time
 
 # Create visualization
 plt.figure(figsize=(12, 8))
@@ -241,6 +243,7 @@ with open(txt_path, 'w') as f:
     f.write(f"  Preprocessing time: {preprocessing_time:.4f} seconds\n")
     f.write(f"  Image to tensor time: {img_to_tensor_time:.4f} seconds\n")
     f.write(f"  Inference time: {inference_time:.4f} seconds\n")
+    f.write(f"  Result extraction time: {extraction_time:.4f} seconds\n")
     f.write(f"  Total time: {preprocessing_time + img_to_tensor_time + inference_time:.4f} seconds\n")
 
 print(f" Results saved to: {output_path}")
