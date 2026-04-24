@@ -353,7 +353,7 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
   total_elapsed <- Sys.time() - total_start
   cat("\n✅ TOTAL ELAPSED:", round(total_elapsed, 2), "s\n")
   
-  # <--- ADDED: Save timings to text file ---
+  # --- Save timings to text file ---
   timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
   txt_filename <- file.path(results_dir, paste0("superpoint_timings_", timestamp, ".txt"))
   
@@ -379,9 +379,7 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
     txt_filename)
   
   cat("✅ Timings saved to:", txt_filename, "\n")
-  # <--- END ADDED ---
-  
-  # <--- ADDED: Return the results ---
+
   return(list(
     keypoints = keypoints,
     scores = scores,
@@ -390,7 +388,6 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
     width = final_w,
     height = final_h
   ))
-  # <--- END ADDED ---
 }
 
 
