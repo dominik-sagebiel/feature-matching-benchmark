@@ -289,17 +289,21 @@ model$eval()
 # Process image with memory safety
 # ============================================
 process_image_safe <- function(image_path, model, max_pixels = 8000000) {
-  start_time <- Sys.time()
+  total_start <- Sys.time()
+  
+  t1 <- Sys.time()
   img <- image_read(image_path)
+ 
   img_gray <- image_convert(img, colorspace = "gray")
+  
   img_info <- image_info(img_gray)
-  orig_w <- img_info$width
-  orig_h <- img_info$height
+  orig_w <- img_info$width; orig_h <- img_info$height
   total_pixels <- orig_w * orig_h
   stride <- 8
   
   cat("Original size:", orig_w, "x", orig_h, "=", total_pixels, "pixels\n")
   
+  # Resize block
   if(total_pixels > max_pixels) {
     scale <- sqrt(max_pixels / total_pixels)
     new_w <- floor(orig_w * scale)
@@ -309,48 +313,47 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
     cat("Downsampling to:", new_w, "x", new_h, "\n")
     img_resized <- image_resize(img_gray, paste0(new_w, "x", new_h))
   } else {
-    new_w <- orig_w
-    new_h <- orig_h
+    new_w <- orig_w; new_h <- orig_h
     img_resized <- img_gray
   }
+  
   
   final_w <- floor(new_w / stride) * stride
   final_h <- floor(new_h / stride) * stride
   if(final_w != new_w || final_h != new_h) {
     cat("Trimming to:", final_w, "x", final_h, "\n")
-    # Use crop, not resize
     img_processed <- image_crop(img_resized, geometry = paste0(final_w, "x", final_h))
   } else {
     img_processed <- img_resized
   }
-  preprocess_time <- Sys.time() - start_time
+  preprocess_time <- Sys.time() - t1
+  t2 <- Sys.time()
   
-  start_time <- Sys.time()
   img_array <- as.numeric(img_processed[[1]]) / 255
-  img_to_array_time <- Sys.time() - start_time
-  start_time <- Sys.time()
+  t3 <- Sys.time()
+  
   img_tensor <- torch_tensor(img_array)$view(c(1, 1, nrow(img_array), ncol(img_array)))
-  array_to_torchtensor_time <- Sys.time() - start_time
+  t4 <- Sys.time()
   
   rm(img, img_gray, img_resized, img_array)
   gc()
   
   cat("Running inference...\n")
-  start_time <- Sys.time()
+  t5 <- Sys.time()
   result <- model(img_tensor)
-  inference_time <- as.numeric(Sys.time() - start_time)
+  inference_time <- Sys.time() - t5
+  cat("  inference:", round(inference_time, 2), "s\n")
   
-  # Extract results
+  t6 <- Sys.time()
   keypoints <- result$keypoints[[1]]
   scores <- result$keypoint_scores[[1]]
   descriptors <- result$descriptors[[1]]
+  t7 <- Sys.time()
   
-  cat("\n✅ Detected", nrow(keypoints), "keypoints\n")
+  total_elapsed <- Sys.time() - total_start
+  cat("\n✅ TOTAL ELAPSED:", round(total_elapsed, 2), "s\n")
   
-  total_time <- as.numeric(preprocess_time) + as.numeric(img_to_array_time) + 
-    as.numeric(array_to_torchtensor_time) + inference_time
-  
-  # Timestamp and save
+  # <--- ADDED: Save timings to text file ---
   timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
   txt_filename <- file.path(results_dir, paste0("superpoint_timings_", timestamp, ".txt"))
   
@@ -366,15 +369,19 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
     paste("Keypoints detected:", nrow(keypoints)),
     "",
     "Timings:",
-    paste("  Preprocessing time:", round(as.numeric(preprocess_time), 4), "seconds"),
-    paste("  Image to array time:", round(as.numeric(img_to_array_time), 4), "seconds"),
-    paste("  Array to torch tensor time:", round(as.numeric(array_to_torchtensor_time), 4), "seconds"),
-    paste("  Inference time:", round(inference_time, 4), "seconds"),
-    paste("  Total time:", round(total_time, 4), "seconds")
-  ), txt_filename)
+    paste("  Preprocessing (load + resize + crop):", round(as.numeric(preprocess_time), 2), "seconds"),
+    paste("  Image to array:", round(as.numeric(t3 - t2), 2), "seconds"),
+    paste("  Array to torch tensor:", round(as.numeric(t4 - t3), 2), "seconds"),
+    paste("  Inference time:", round(inference_time, 2), "seconds"),
+    paste("  Result extraction:", round(as.numeric(t7 - t6), 2), "seconds"),
+    paste("  Total elapsed:", round(total_elapsed, 2), "seconds")
+    ),
+    txt_filename)
   
   cat("✅ Timings saved to:", txt_filename, "\n")
+  # <--- END ADDED ---
   
+  # <--- ADDED: Return the results ---
   return(list(
     keypoints = keypoints,
     scores = scores,
@@ -383,12 +390,19 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
     width = final_w,
     height = final_h
   ))
+  # <--- END ADDED ---
 }
+
+
 # ============================================
 # Run processing
 # ============================================
-max_pixels <- 4000000  # adjust if needed (8 megapixels)
+max_pixels <- 1000000  # adjust if needed (8 megapixels)
+gc()
+start_time <- Sys.time()
 result <- process_image_safe(image_path, model, max_pixels)
+TOTAL_TIME <- Sys.time() - start_time
+TOTAL_TIME
 
 keypoints <- result$keypoints
 scores <- result$scores
