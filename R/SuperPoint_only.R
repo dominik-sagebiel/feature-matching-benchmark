@@ -397,7 +397,7 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
 # ============================================
 # Run processing
 # ============================================
-max_pixels <- 1000000  # adjust if needed (8 megapixels)
+max_pixels <- 8000000  # adjust if needed (8 megapixels)
 gc()
 start_time <- Sys.time()
 result <- process_image_safe(image_path, model, max_pixels)
