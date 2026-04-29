@@ -231,9 +231,9 @@ def extract_sift_features(image, max_keypoints=5000):
 def load_superpoint_model():
     """Load SuperPoint model using auto-detected paths"""
     model = SuperPoint(
-        nms_radius=2,
-        max_num_keypoints=5000,
-        detection_threshold=0.001,
+        nms_radius=4,
+        max_num_keypoints=20000,
+        detection_threshold=0.005,
         remove_borders=4,
         descriptor_dim=256,
         channels=[64, 64, 128, 128, 256]

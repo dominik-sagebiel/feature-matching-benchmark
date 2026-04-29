@@ -210,7 +210,7 @@ def pipeline_sift(image_orig, image_rot):
 # ============================================================================
 def load_rpautrat_sp():
     model = RPAutratSuperPoint(
-        nms_radius=2, max_num_keypoints=MAX_KP_SP_FLANN,
+        nms_radius=4, max_num_keypoints=MAX_KP_SP_FLANN,
         detection_threshold=0.001, remove_borders=4,
         descriptor_dim=256, channels=[64, 64, 128, 128, 256]
     )

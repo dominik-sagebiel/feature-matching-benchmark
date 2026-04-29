@@ -132,7 +132,7 @@ SuperPoint <- torch::nn_module(
                         nms_radius = 4,
                         detection_threshold = 0.005,
                         max_num_keypoints = 20000,
-                        remove_borders = 0) {
+                        remove_borders = 4) {
     self$descriptor_dim <- descriptor_dim
     self$nms_radius <- nms_radius
     self$detection_threshold <- detection_threshold

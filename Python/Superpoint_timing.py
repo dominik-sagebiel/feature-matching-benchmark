@@ -136,7 +136,7 @@ model = SuperPoint(
     nms_radius=4,
     max_num_keypoints=20000, 
     detection_threshold=0.005,
-    remove_borders=0,
+    remove_borders=4,
     descriptor_dim=256,
     channels=[64, 64, 128, 128, 256]
 )
