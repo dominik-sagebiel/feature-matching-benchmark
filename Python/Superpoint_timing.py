@@ -136,7 +136,7 @@ model = SuperPoint(
     nms_radius=4,
     max_num_keypoints=20000, 
     detection_threshold=0.005,
-    remove_borders=4,
+    remove_borders=0,
     descriptor_dim=256,
     channels=[64, 64, 128, 128, 256]
 )
@@ -203,8 +203,8 @@ plt.imshow(img_display, cmap='gray')
 if len(keypoints) > 0:
     plt.scatter(keypoints[:, 0], keypoints[:, 1], 
                 c='lime',           # Bright green
-                s=15,                # Small, consistent size
-                alpha=0.8,            # Slightly transparent
+                s=0.5,                # Small, consistent size
+                alpha=1,              #not transparent
                 marker='o',           # Circle marker
                 edgecolors=None)      # No outline
 
