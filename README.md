@@ -11,15 +11,17 @@ feature-matching-benchmark/
 ├───Python/                 # Python scripts  
 │   ├───20points_onlyFLANNransac.py    # SIFT vs SuperPoint (FLANN+RANSAC)  
 │   └───20points_all_PC.py             # SuperPoint + SuperGlue, SIFT + FLANN, SP + FLANN, SIFT + SG comparison  
+│   └───Resize_image.py                # Resizes image and saves it in Images  
+│   └───Superpoint_timing.py           # Measures Superpoint inference time and img preprocessing time  
 ├───R/                      # R scripts  
-│   └───rpautratSuperPoint_IMGwithSizeLimit.R  
+│   └───Superpoint_timing_noResizing.R        # Runs Superpoint with resized image from Resize_image.py  
+│   └───Superpoint_timing_withResizing.R      # Resizes Image and runs Superpoint   
 ├───Repos/                  # External repositories (clone here)  
 │   ├───SuperPoint/                     # rpautrat/SuperPoint  
 │   └───SuperGluePretrainedNetwork/     # MagicLeap/SuperGlue  
 ├───Results/                # All outputs (auto-created)  
 │   ├───Python/             # Python script results  
 │   └───R/                  # R script results  
-├───requirements.txt        # Python dependencies  
 └───README.md              # This file  
 
 Quick Start
@@ -39,10 +41,6 @@ cd ..
 
 3. Add your images
 
-Place your test images (.png, .jpg, or .tif) in the Images/ folder.
+Place your test images (.png, .jpg, or .tif) in the Images/ folder or use examples images
 
-4. Run the scripts
-
-cd Python  
-python 20points_onlyFLANNransac.py  
-python 20points_all_PC.py  
+4. Run the scripts  
