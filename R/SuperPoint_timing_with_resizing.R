@@ -129,10 +129,10 @@ SuperPoint <- torch::nn_module(
   "SuperPoint",
   initialize = function(descriptor_dim = 256,
                         channels = c(64, 64, 128, 128),
-                        nms_radius = 3,
-                        detection_threshold = 0.0001,
-                        max_num_keypoints = 5000,
-                        remove_borders = 4) {
+                        nms_radius = 4,
+                        detection_threshold = 0.005,
+                        max_num_keypoints = 20000,
+                        remove_borders = 0) {
     self$descriptor_dim <- descriptor_dim
     self$nms_radius <- nms_radius
     self$detection_threshold <- detection_threshold
@@ -151,7 +151,6 @@ SuperPoint <- torch::nn_module(
       c_in <- c_out
     }
     self$backbone <- nn_module_list(backbone_blocks)
-    
     self$detector <- nn_module_list(list(
       VGGBlock(channels[length(channels)], 256, 3),
       VGGBlock(256, 65, 1, relu = FALSE)
@@ -161,6 +160,80 @@ SuperPoint <- torch::nn_module(
       VGGBlock(channels[length(channels)], 256, 3),
       VGGBlock(256, descriptor_dim, 1, relu = FALSE)
     ))
+  },
+  batched_nms = function(scores) {
+    if(self$nms_radius < 0) return(scores)
+    
+    nms_radius <- self$nms_radius
+    kernel_size <- nms_radius * 2 + 1
+    padding <- nms_radius
+    
+    max_pool <- function(x) {
+      # x is (batch, H, W) – add channel dim to get (batch, 1, H, W)
+      x_4d <- x$unsqueeze(1)
+      pooled <- nnf_max_pool2d(x_4d, kernel_size = kernel_size, stride = 1, padding = padding)
+      # remove channel dim, back to (batch, H, W)
+      pooled$squeeze(1)
+    }
+    
+    zeros <- torch_zeros_like(scores)
+    max_mask <- scores == max_pool(scores)
+    
+    for(iter in 1:2) {
+      supp_mask <- max_pool(max_mask$to(dtype = torch_float())) > 0
+      supp_scores <- torch_where(supp_mask, zeros, scores)
+      new_max_mask <- supp_scores == max_pool(supp_scores)
+      max_mask <- max_mask | (new_max_mask & (!supp_mask))
+    }
+    
+    return(torch_where(max_mask, scores, zeros))
+  },
+  sample_descriptors = function(keypoints, descriptors_dense, w, h) {
+    # Empty keypoints case
+    if (is.null(keypoints) || nrow(keypoints) == 0) {
+      return(torch_tensor(matrix(0, nrow=0, ncol=self$descriptor_dim), device = "cpu"))
+    }
+    
+    # Ensure keypoints is a numeric matrix
+    if (!is.matrix(keypoints)) keypoints <- as.matrix(keypoints)
+    if (nrow(keypoints) == 0) {
+      return(torch_tensor(matrix(0, nrow=0, ncol=self$descriptor_dim), device = "cpu"))
+    }
+    storage.mode(keypoints) <- "double"
+    
+    # Remove any NA/Inf rows
+    na_idx <- which(is.na(keypoints[,1]) | is.na(keypoints[,2]) | 
+                      is.infinite(keypoints[,1]) | is.infinite(keypoints[,2]))
+    if (length(na_idx) > 0) keypoints <- keypoints[-na_idx, , drop = FALSE]
+    if (nrow(keypoints) == 0) {
+      return(torch_tensor(matrix(0, nrow=0, ncol=self$descriptor_dim), device = "cpu"))
+    }
+    
+    # Create tensor on CPU
+    kp_tensor <- torch::torch_tensor(keypoints)$float()
+    kp_tensor <- kp_tensor$unsqueeze(1)   # [1, N, 2]
+    
+    # Move descriptors_dense to CPU
+    desc_cpu <- descriptors_dense$to(device = "cpu")
+    
+    # Normalize keypoints to [-1, 1]
+    scale <- torch::torch_tensor(c(w, h), device = "cpu")$float() * self$stride
+    kp_norm <- (kp_tensor + 0.5) / scale
+    kp_norm <- kp_norm * 2 - 1
+    kp_norm <- kp_norm$view(c(1, 1, -1, 2))
+    
+    # Call grid_sample with explicit padding_mode
+    sampled <- nnf_grid_sample(
+      desc_cpu, kp_norm,
+      mode = "bilinear",
+      padding_mode = "zeros",
+      align_corners = FALSE
+    )
+    
+    # Reshape to [N, descriptor_dim]
+    descriptors <- sampled$reshape(c(self$descriptor_dim, -1))$t()
+    descriptors <- nnf_normalize(descriptors, p = 2, dim = 2)
+    return(descriptors)
   },
   forward = function(image) {
     if(image$size(2) == 3) {
@@ -196,15 +269,7 @@ SuperPoint <- torch::nn_module(
     scores_full <- scores$reshape(c(batch_size, h * self$stride, w * self$stride))
     scores_full <- scores_full[, 1:orig_h, 1:orig_w]
     
-    if(self$nms_radius > 0) {
-      kernel_size <- self$nms_radius * 2 + 1
-      padding <- self$nms_radius
-      scores_4d <- scores_full$unsqueeze(1)
-      max_pooled <- nnf_max_pool2d(scores_4d, kernel_size = kernel_size, stride = 1, padding = padding)
-      max_pooled <- max_pooled$squeeze(1)
-      max_mask <- scores_full == max_pooled
-      scores_full <- torch_where(max_mask, scores_full, torch_zeros_like(scores_full))
-    }
+    scores_full <- self$batched_nms(scores_full)
     
     keypoints_list <- list()
     scores_list <- list()
@@ -216,12 +281,12 @@ SuperPoint <- torch::nn_module(
       if(self$remove_borders > 0) {
         pad <- self$remove_borders
         if(pad <= nrow(score_map)) {
-          score_map[1:pad, ] <- 0
-          score_map[(nrow(score_map) - pad + 1):nrow(score_map), ] <- 0
+          score_map[1:pad, ] <- -1
+          score_map[(nrow(score_map) - pad + 1):nrow(score_map), ] <- -1
         }
         if(pad <= ncol(score_map)) {
-          score_map[, 1:pad] <- 0
-          score_map[, (ncol(score_map) - pad + 1):ncol(score_map)] <- 0
+          score_map[, 1:pad] <- -1
+          score_map[, (ncol(score_map) - pad + 1):ncol(score_map)] <- -1
         }
       }
       
@@ -249,19 +314,19 @@ SuperPoint <- torch::nn_module(
         }
       }
       
-      desc_array <- as_array(descriptors_dense[b, , , ])
-      kp_x <- floor(keypoints[, 1] / self$stride) + 1
-      kp_y <- floor(keypoints[, 2] / self$stride) + 1
-      kp_x <- pmax(1, pmin(w, kp_x))
-      kp_y <- pmax(1, pmin(h, kp_y))
-      
-      descriptors_out <- matrix(0, nrow = nrow(keypoints), ncol = self$descriptor_dim)
-      for(j in 1:nrow(keypoints)) {
-        descriptors_out[j, ] <- desc_array[, kp_y[j], kp_x[j]]
+      if(nrow(keypoints) > 0) {
+        
+        if (!is.matrix(keypoints)) keypoints <- as.matrix(keypoints)
+        descriptors_out <- self$sample_descriptors(
+          keypoints, 
+          descriptors_dense[b, , , , drop = FALSE], 
+          w, h
+        )
+        descriptors_out <- as_array(descriptors_out)
+      } else {
+        descriptors_out <- matrix(0, nrow=0, ncol=self$descriptor_dim)
       }
-      desc_norm <- sqrt(rowSums(descriptors_out^2))
-      desc_norm[desc_norm == 0] <- 1
-      descriptors_out <- descriptors_out / desc_norm
+      
       
       keypoints_list[[b]] <- keypoints
       scores_list[[b]] <- kp_scores
@@ -329,7 +394,7 @@ process_image_safe <- function(image_path, model, max_pixels = 8000000) {
   preprocess_time <- Sys.time() - t1
   t2 <- Sys.time()
   
-  img_array <- as.numeric(img_processed[[1]]) / 255
+  img_array <- as.numeric(img_processed[[1]]) 
   t3 <- Sys.time()
   
   img_tensor <- torch_tensor(img_array)$view(c(1, 1, nrow(img_array), ncol(img_array)))
