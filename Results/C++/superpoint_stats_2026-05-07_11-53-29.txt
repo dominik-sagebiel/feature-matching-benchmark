@@ -1,0 +1,13 @@
+SuperPoint C++ Inference Statistics
+====================================
+
+Image: Resized_Image.png
+Number of keypoints: 24113
+Inference time: 39953 ms
+
+Scores:
+  Min: 0.00500006
+  Max: 0.599464
+  Mean: 0.0664077
+
+Descriptors shape: [24113, 256]
