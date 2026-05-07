@@ -39,7 +39,7 @@ cmake -G "Visual Studio 17 2022" -A x64 -T v143 -DCMAKE_PREFIX_PATH="../libtorch
 cmake --build . --config Release 
 ```
 
-- Move .pt file and input image to relese folder within build.    
+- Move .pt file and input image to /Release folder within /build.    
 - It is recommended, for consistency, that a Resized_Image.png, which is resized 
 by the Resize_Image.py script from the Python folder is used as input   
 
